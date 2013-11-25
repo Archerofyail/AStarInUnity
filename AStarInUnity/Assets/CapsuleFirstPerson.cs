@@ -172,4 +172,12 @@ public class CapsuleFirstPerson : MonoBehaviour
 			}
 		}
 	}
+
+	void OnTriggerEnter(Collider other)
+	{
+		if (other.tag == "PathNode")
+		{
+			currentGridPosition = other.GetComponent<AStarNode>().GridPosition;
+		}
+	}
 }

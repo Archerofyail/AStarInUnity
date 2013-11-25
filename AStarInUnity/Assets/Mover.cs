@@ -34,9 +34,10 @@ public struct CachedNode
 
 public class Mover : MonoBehaviour
 {
-	private enum CurrentState
+	public enum CurrentState
 	{
 		Idling,
+		Wandering,
 		LookingForTarget,
 		FindingPath,
 		Moving,
@@ -44,14 +45,18 @@ public class Mover : MonoBehaviour
 		TargetImpossibleToReach
 	}
 
-	private CurrentState movementState = CurrentState.Idling;
+	public CurrentState movementState = CurrentState.Wandering;
 
 	public Vector2 targetNodePosition;
 	public Vector2 initialPosition;
 	/// <summary>
 	///Used to determine whether debug rays should be drawn. Only change in inspector 
 	/// </summary>
-	public bool shouldDrawRays;
+	public bool DebugRays;
+	/// <summary>
+	/// Used to determin whether path lines should be drawn in editor. Only should change in inspector
+	/// </summary>
+	public bool DebugPathDraw;
 	/// <summary>
 	/// List of nodes that have had their values calculated and are available to be chosen
 	/// </summary>
@@ -69,6 +74,9 @@ public class Mover : MonoBehaviour
 	/// </summary>
 	public int stepsBetweenNodes = 5;
 
+	public int secondsForRaysToStayUp;
+	public int secondsForPathsToStayUp;
+
 	/// <summary>
 	/// The speed of the mover
 	/// </summary>
@@ -82,7 +90,7 @@ public class Mover : MonoBehaviour
 	/// <summary>
 	/// The player object
 	/// </summary>
-	public CapsuleFirstPerson player;
+
 
 	private int recurseCount = 0;
 	/// <summary>
@@ -100,7 +108,7 @@ public class Mover : MonoBehaviour
 	/// <summary>
 	/// The current position the mover actually is at
 	/// </summary>
-	private Vector2 currentMoverGridPosition;
+	public Vector2 currentMoverGridPosition { get; private set; }
 	/// <summary>
 	/// The last position currentPathCalcPosition was at
 	/// </summary>
@@ -121,6 +129,7 @@ public class Mover : MonoBehaviour
 	private bool canSeePlayer;
 
 
+
 	void Start()
 	{
 
@@ -128,34 +137,36 @@ public class Mover : MonoBehaviour
 		closedList = new List<CachedNode>(50);
 		pathNodes = new List<CachedNode>(50);
 		//currentAdjacentNodes = new List<CachedNode>(8);
-		var tempObjects = Physics.OverlapSphere(transform.position, 0.5f, 9);
-		if (tempObjects.Length > 0)
-		{
-			foreach (var overlappingObject in tempObjects)
-			{
-				if (overlappingObject.tag == "PathNode")
-				{
-					currentPathCalcNode = new CachedNode(0, GetHCost(currentMoverGridPosition, targetNodePosition),
-														 tempObjects[0].GetComponent<AStarNode>(),
-														 tempObjects[0].GetComponent<AStarNode>());
-					currentMoverGridPosition = tempObjects[0].GetComponent<AStarNode>().GridPosition;
-					break;
-				}
-			}
-		}
-
-		//transform.position = GetRandomWaypoint().transform.position;
+		currentPathCalcNode = new CachedNode(0, GetHCost(currentMoverGridPosition, targetNodePosition),
+														 aStarGrid.AStarNodes[(int)initialPosition.y, (int)initialPosition.x].GetComponent<AStarNode>(),
+														aStarGrid.AStarNodes[(int)initialPosition.y, (int)initialPosition.x].GetComponent<AStarNode>());
+		currentMoverGridPosition = currentPathCalcNode.NodeCached.GridPosition;
+		transform.position = currentPathCalcNode.NodeCached.transform.position;
 		nextNode = aStarGrid.AStarNodes[(int)currentMoverGridPosition.y, (int)currentMoverGridPosition.x].GetComponent<AStarNode>();
 	}
 
 	void Update()
 	{
 
-		canSeePlayer = !Physics.Linecast(transform.position, player.transform.position, 8);
+
 
 		switch (movementState)
 		{
 			case CurrentState.Idling:
+			{
+				closedList.Clear();
+				openList.Clear();
+				pathNodes.Clear();
+
+				movementState = CurrentState.LookingForTarget;
+
+				openList.Add(currentPathCalcNode);
+				canReachTarget = true;
+				//GetAdjacentNodes();
+				currentNode = 0;
+			}
+			break;
+			case CurrentState.Wandering:
 			{
 				closedList.Clear();
 				openList.Clear();
@@ -201,7 +212,7 @@ public class Mover : MonoBehaviour
 				pathNodes.Clear();
 				openList.Clear();
 				closedList.Clear();
-				movementState = CurrentState.Idling;
+				movementState = CurrentState.Wandering;
 			}
 			break;
 			case CurrentState.TargetImpossibleToReach:
@@ -209,13 +220,13 @@ public class Mover : MonoBehaviour
 				//Find new target if possible, else return to idle state
 				targetNodePosition = GetRandomWaypoint().GridPosition;
 				currentPathCalcNode = new CachedNode(0, GetHCost(currentMoverGridPosition, targetNodePosition),
-				                                     aStarGrid.AStarNodes[
-					                                     (int) currentMoverGridPosition.y, (int) currentMoverGridPosition.x]
-					                                     .GetComponent<AStarNode>(),
-				                                     aStarGrid.AStarNodes[
-					                                     (int) currentMoverGridPosition.y, (int) currentMoverGridPosition.x]
-					                                     .GetComponent<AStarNode>());
-				movementState = CurrentState.Idling;
+													 aStarGrid.AStarNodes[
+														 (int)currentMoverGridPosition.y, (int)currentMoverGridPosition.x]
+														 .GetComponent<AStarNode>(),
+													 aStarGrid.AStarNodes[
+														 (int)currentMoverGridPosition.y, (int)currentMoverGridPosition.x]
+														 .GetComponent<AStarNode>());
+				movementState = CurrentState.Wandering;
 			}
 			break;
 		}
@@ -259,7 +270,7 @@ public class Mover : MonoBehaviour
 				movementState = CurrentState.FindingPath;
 				//SmoothPath();
 				PathFindNode = closedList[closedList.Count - 1];
-				if (shouldDrawRays)
+				if (DebugRays)
 				{
 					Debug.DrawRay(currentPathCalcNode.NodeCached.transform.position, currentPathCalcNode.NodeCached.transform.up,
 								  Color.blue, 50f);
@@ -267,10 +278,10 @@ public class Mover : MonoBehaviour
 				return;
 			}
 
-			if (shouldDrawRays)
+			if (DebugRays)
 			{
 				Debug.DrawRay(currentPathCalcNode.NodeCached.transform.position, currentPathCalcNode.NodeCached.transform.up,
-							  Color.red, 50f);
+							  Color.red, secondsForRaysToStayUp);
 			}
 		}
 		var listOfNodesToAdd = new List<CachedNode>(8);
@@ -297,7 +308,8 @@ public class Mover : MonoBehaviour
 							tempAdjNode.RecalculateFCost();
 						}
 					}
-					//If it isn’t on the open list, add it to the open list. Make the current square the parent of this square. Record the F, G, and H costs of the square. 
+					//If it isn’t on the open list, add it to the open list. Make the current square the parent of this square. 
+					//Record the F, G, and H costs of the square. 
 					else if (openList.All(cachedNode => adjacentNode.GridPosition != cachedNode.NodeCached.GridPosition))
 					{
 
@@ -308,9 +320,9 @@ public class Mover : MonoBehaviour
 						listOfNodesToAdd.Add(tempAdjNode);
 						//Debug.Log("Added " + tempAdjNode.NodeCached.gameObject.name + " to the open list");
 						//openList[openList.Count - 1].NodeCached.renderer.enabled = true;
-						if (shouldDrawRays)
+						if (DebugRays)
 						{
-							Debug.DrawRay(tempAdjNode.NodeCached.transform.position, transform.up, Color.green, 50f);
+							Debug.DrawRay(tempAdjNode.NodeCached.transform.position, transform.up, Color.green, secondsForRaysToStayUp);
 						}
 					}
 				}
@@ -334,21 +346,24 @@ public class Mover : MonoBehaviour
 	/// </summary>
 	void FindPath()
 	{
-		if (PathFindNode.NodeCached.GridPosition != currentMoverGridPosition)
+		if (PathFindNode.NodeCached)
 		{
-			pathNodes.Add(PathFindNode);
-			PathFindNode =
-				closedList.Find(closedNode => closedNode.NodeCached.GridPosition == PathFindNode.ParentNode.GridPosition);
-			if (shouldDrawRays)
+			if (PathFindNode.NodeCached.GridPosition != currentMoverGridPosition)
 			{
-				Debug.DrawRay(PathFindNode.NodeCached.transform.position, Vector3.up, Color.white, 50f);
+				pathNodes.Add(PathFindNode);
+				PathFindNode =
+					closedList.Find(closedNode => closedNode.NodeCached.GridPosition == PathFindNode.ParentNode.GridPosition);
+				if (DebugRays && PathFindNode.NodeCached)
+				{
+					Debug.DrawRay(PathFindNode.NodeCached.transform.position, Vector3.up, Color.white, secondsForRaysToStayUp);
+				}
 			}
-		}
-		else
-		{
-			pathNodes.Reverse();
-			SmoothPath();
-			movementState = CurrentState.Moving;
+			else
+			{
+				pathNodes.Reverse();
+				SmoothPath();
+				movementState = CurrentState.Moving;
+			}
 		}
 	}
 
@@ -385,6 +400,16 @@ public class Mover : MonoBehaviour
 			{
 				pathNodes.Remove(node);
 			}
+			if (DebugPathDraw)
+			{
+				int i = 0;
+				foreach (var pathNode in pathNodes)
+				{
+					Debug.DrawLine(pathNode.NodeCached.transform.position,
+								   pathNodes[i < pathNodes.Count - 2 ? ++i : pathNodes.Count - 1].NodeCached.transform.position,
+								   new Color(255, 215, 0), secondsForPathsToStayUp);
+				}
+			}
 			//foreach (var node in pathNodes)
 			//{
 			//	Debug.DrawRay(node.NodeCached.transform.position, transform.up, Color.black, 50f);
@@ -418,16 +443,16 @@ public class Mover : MonoBehaviour
 		{
 			var position = new Vector3(firstNode.x + (secondNode.x - firstNode.x) / (stepsBetweenNodes * numOfNodesInBetween) * i, 1,
 									   firstNode.z + (secondNode.z - firstNode.z) / (stepsBetweenNodes * numOfNodesInBetween) * i);
-			if (shouldDrawRays)
+			if (DebugRays)
 			{
-				if (stepsBetweenNodes % 5 == 0)
-				{
-					Debug.DrawRay(position, Vector3.up, new Color(255, 215, 0), 10f);
-				}
-				else
-				{
-					Debug.DrawLine(position, position + Vector3.up * 10, new Color(255, 215, 0), 10f);
-				}
+				//if (stepsBetweenNodes % 5 == 0)
+				//{
+				//	Debug.DrawRay(position, Vector3.up, Color.clear, 10f);
+				//}
+				//else
+				//{
+				//	Debug.DrawLine(position, position + Vector3.up * 10, new Color(255, 215, 0), secondsForRaysToStayUp);
+				//}
 			}
 
 			var tempObjects = Physics.OverlapSphere(position, 0.7f);
@@ -497,11 +522,11 @@ public class Mover : MonoBehaviour
 	AStarNode GetRandomWaypoint()
 	{
 		AStarNode tempNode =
-			aStarGrid.AStarNodes[Random.Range(0, aStarGrid.gridLength), Random.Range(0, aStarGrid.gridWidth)];
+			aStarGrid.AStarNodes[Random.Range(0, aStarGrid.gridLength - 1), Random.Range(0, aStarGrid.gridWidth - 1)];
 		while (!tempNode.IsWalkable)
 		{
 			tempNode =
-			aStarGrid.AStarNodes[Random.Range(0, aStarGrid.gridLength), Random.Range(0, aStarGrid.gridWidth)];
+			aStarGrid.AStarNodes[Random.Range(0, aStarGrid.gridLength - 1), Random.Range(0, aStarGrid.gridWidth - 1)];
 		}
 		return tempNode;
 	}
@@ -515,8 +540,10 @@ public class Mover : MonoBehaviour
 	int GetHCost(Vector2 currentPos, Vector2 targetPos)
 	{
 		int tempCost =
-			(int)
-			(Mathf.Abs(targetPos.x - currentPos.x) + Mathf.Abs(targetPos.y - currentPos.y)) * 10;
+			//(int)
+			//(Mathf.Abs(targetPos.x - currentPos.x) + Mathf.Abs(targetPos.y - currentPos.y)) * 10;
+		(int)
+			Mathf.Abs((targetPos - currentPos).sqrMagnitude);
 		return tempCost;
 	}
 	/// <summary>

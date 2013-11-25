@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class AStarNode : MonoBehaviour
 {
 	public Vector2 GridPosition;
