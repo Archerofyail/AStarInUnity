@@ -22,6 +22,7 @@ public class AStarGridCreator : MonoBehaviour
 
 	}
 
+	//more comments
 	[ContextMenu("Create Grid")]
 	void CreateGrid()
 	{
