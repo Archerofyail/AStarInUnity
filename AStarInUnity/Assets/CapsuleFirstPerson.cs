@@ -28,8 +28,8 @@ public class CapsuleFirstPerson : MonoBehaviour
 	Quaternion targetRotation;
 	Vector3 angles;
 	bool grounded = true;
-	bool hasDoubleJumped = false;
-	bool startedRotating = false;
+	bool hasDoubleJumped;
+	bool startedRotating;
 	public Camera characterCam;
 
 	public Vector2 currentGridPosition;
