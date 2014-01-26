@@ -399,7 +399,7 @@ public class Mover : MonoBehaviour
 															  nextNode.gameObject.transform.position - transform.position,
 															  rotationSpeed * Time.deltaTime, rotationSpeed * Time.deltaTime));
 			transform.rotation = new Quaternion(0, temp.y, 0, temp.w);
-			transform.Translate(0, 0, speed * Time.deltaTime);
+			rigidbody.MovePosition(new Vector3(0, 0, speed * Time.deltaTime));
 			//Debug.DrawRay(nextNode.gameObject.transform.position, nextNode.transform.up, Color.red, 1f);
 		}
 
