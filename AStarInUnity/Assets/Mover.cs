@@ -9,7 +9,7 @@ using UnityEngine;
 //A point in between nodes to check if there were any obstacles
 //
 
-public struct CachedNode
+public class CachedNode
 {
 	public int FCost;
 	public int GCost;
@@ -88,12 +88,6 @@ public class Mover : MonoBehaviour
 	/// </summary>
 	public AStarGridCreator aStarGrid;
 	/// <summary>
-	/// The player object
-	/// </summary>
-
-
-	private int recurseCount = 0;
-	/// <summary>
 	/// The current index of the path nodes list
 	/// </summary>
 	private int currentNode;
@@ -132,7 +126,7 @@ public class Mover : MonoBehaviour
 
 	void Start()
 	{
-
+		aStarGrid = GameObject.Find("AStarNodeManager").GetComponent<AStarGridCreator>();
 		openList = new List<CachedNode>(50);
 		closedList = new List<CachedNode>(50);
 		pathNodes = new List<CachedNode>(50);
@@ -140,6 +134,8 @@ public class Mover : MonoBehaviour
 		currentPathCalcNode = new CachedNode(0, GetHCost(currentMoverGridPosition, targetNodePosition),
 														 aStarGrid.AStarNodes[(int)initialPosition.y, (int)initialPosition.x].GetComponent<AStarNode>(),
 														aStarGrid.AStarNodes[(int)initialPosition.y, (int)initialPosition.x].GetComponent<AStarNode>());
+		print(aStarGrid + " node at 0, 0 is " + aStarGrid.AStarNodes[0, 0]);
+		print(aStarGrid);
 		currentMoverGridPosition = currentPathCalcNode.NodeCached.GridPosition;
 		transform.position = currentPathCalcNode.NodeCached.transform.position;
 		nextNode = aStarGrid.AStarNodes[(int)currentMoverGridPosition.y, (int)currentMoverGridPosition.x].GetComponent<AStarNode>();

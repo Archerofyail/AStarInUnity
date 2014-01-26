@@ -13,12 +13,21 @@ public class AStarGridCreator : MonoBehaviour
 	{
 		AStarNodes = new AStarNode[gridWidth, gridLength];
 		var tempNodeArray = (AStarNode[])FindObjectsOfType(typeof(AStarNode));
-		//Debug.Log("found all pathnodes " + tempNodeArray);
-		foreach (var node in tempNodeArray)
+		if (tempNodeArray.Length == 0)
 		{
-			AStarNodes[(int)node.GridPosition.y, (int)node.GridPosition.x] = node;
-			//Debug.Log("Created Node at " + node.GridPosition);
+			CreateGrid();
+			print("couldn't find nodes, created new grid");
 		}
+		else
+		{
+			//Debug.Log("found all pathnodes " + tempNodeArray);
+			foreach (var node in tempNodeArray)
+			{
+				AStarNodes[(int)node.GridPosition.y, (int)node.GridPosition.x] = node;
+				//Debug.Log("Created Node at " + node.GridPosition);
+			}
+		}
+		
 
 	}
 
