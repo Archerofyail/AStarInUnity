@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -94,9 +95,20 @@ public class Mover : MonoBehaviour
 	/// </summary>
 	private CachedNode PathFindNode;
 
+	private bool isFindTargetRunning;
+
 	void Start()
 	{
+		
 		aStarGrid = GameObject.Find("AStarNodeManager").GetComponent<AStarGridCreator>();
+		if (targetNodePosition.x < 0)
+		{
+			targetNodePosition = GetRandomWaypoint().GridPosition;
+		}
+		if (initialPosition.x < 0)
+		{
+			initialPosition = GetRandomWaypoint().GridPosition;
+		}
 		openList = new List<CachedNode>(50);
 		closedList = new List<CachedNode>(50);
 		pathNodes = new List<CachedNode>(50);
@@ -131,8 +143,8 @@ public class Mover : MonoBehaviour
 				closedList.Clear();
 				openList.Clear();
 				pathNodes.Clear();
-
-				targetNodePosition = GetRandomWaypoint().GridPosition;
+				
+				
 				movementState = CurrentState.LookingForTarget;
 
 				openList.Add(currentPathCalcNode);
@@ -145,7 +157,11 @@ public class Mover : MonoBehaviour
 
 				if (canReachTarget)
 				{
-					FindTarget();
+					if (!isFindTargetRunning)
+					{
+						StartCoroutine("FindTarget");
+					}
+					//FindTarget();
 				}
 				else
 				{
@@ -170,6 +186,7 @@ public class Mover : MonoBehaviour
 				pathNodes.Clear();
 				openList.Clear();
 				closedList.Clear();
+				targetNodePosition = GetRandomWaypoint().GridPosition;
 				movementState = CurrentState.Wandering;
 			}
 			break;
@@ -206,74 +223,79 @@ public class Mover : MonoBehaviour
 	/// <summary>
 	/// Searches for the target using an A* search algorithm (WIP)
 	/// </summary>
-	private void FindTarget()
+	private IEnumerator FindTarget()
 	{
-		//Find the cheapest FCost node in the open list
-		var tempOpenNode = new CachedNode(10000, 15000, null, null);
-		// Look for the lowest F cost square on the open list. We refer to this as the current square.
-		foreach (var node in openList)
+		while (currentPathCalcNode.NodeCached.GridPosition != targetNodePosition && openList.Count > 0)
 		{
-			//If node FCost is less than temp node FCost
-			if (node.FCost < tempOpenNode.FCost)
+			isFindTargetRunning = true;
+			//Find the cheapest FCost node in the open list
+			var tempOpenNode = new CachedNode(10000, 15000, null, null);
+			// Look for the lowest F cost square on the open list. We refer to this as the current square.
+			foreach (var node in openList)
 			{
-				tempOpenNode = node;
-			}
-		}
-
-
-		{
-			currentPathCalcNode = tempOpenNode;
-
-			closedList.Add(currentPathCalcNode);
-			// Switch it to the closed list.
-			openList.Remove(currentPathCalcNode);
-			//Stop when you add the target square to the closed list, in which case the path has been found (see note below)
-			if (currentPathCalcNode.NodeCached.GridPosition == targetNodePosition)
-			{
-				movementState = CurrentState.FindingPath;
-				//SmoothPath();
-				PathFindNode = closedList[closedList.Count - 1];
-				return;
-			}
-		}
-		var listOfNodesToAdd = new List<CachedNode>(8);
-		//For each of the 8 squares adjacent to this current square …
-		foreach (var adjacentNode in currentPathCalcNode.NodeCached.AdjacentNodes)
-		{
-			if (adjacentNode.IsWalkable)
-			{//If it is not walkable or if it is on the closed list, ignore it. Otherwise do the following
-				if (closedList.All(cachedNode => adjacentNode.GridPosition != cachedNode.NodeCached.GridPosition))
+				//If node FCost is less than temp node FCost
+				if (node.FCost < tempOpenNode.FCost)
 				{
-					//If it is on the open list already, check to see if this path to that square is better, using G cost as the measure. A lower G cost means 
-					//that this is a better path. If so, change the parent of the square to the current square, and recalculate the G and F scores of the square
-					if (openList.Any(cachedNode => adjacentNode.GridPosition == cachedNode.NodeCached.GridPosition))
-					{
-						var tempAdjNode = openList.Find(openNode => openNode.NodeCached.GridPosition == adjacentNode.GridPosition);
-
-						if (tempAdjNode.GCost < currentPathCalcNode.GCost)
-						{
-							//Debug.Log("Recalculated " + tempAdjNode.NodeCached.gameObject.name + " GCost and FCost and parented it to " +
-							//currentPathCalcNode.NodeCached.gameObject.name);
-							tempAdjNode.ParentNode = currentPathCalcNode.NodeCached;
-							tempAdjNode.GCost = currentPathCalcNode.GCost +
-												GetGCost(tempAdjNode.NodeCached.transform.position, currentPathCalcNode.NodeCached.transform.position);
-							tempAdjNode.RecalculateFCost();
-						}
-					}
-					//If it isn’t on the open list, add it to the open list. Make the current square the parent of this square. 
-					//Record the F, G, and H costs of the square. 
-					else if (openList.All(cachedNode => adjacentNode.GridPosition != cachedNode.NodeCached.GridPosition))
-					{
-
-						var tempAdjNode =
-							new CachedNode(
-								0, GetHCost(adjacentNode.GridPosition, targetNodePosition), adjacentNode, currentPathCalcNode.NodeCached);
-						listOfNodesToAdd.Add(tempAdjNode);
-					}
+					tempOpenNode = node;
 				}
 			}
-			openList.AddRange(listOfNodesToAdd);
-			listOfNodesToAdd.Clear();
+
+
+			{
+				currentPathCalcNode = tempOpenNode;
+
+				closedList.Add(currentPathCalcNode);
+				// Switch it to the closed list.
+				openList.Remove(currentPathCalcNode);
+				//Stop when you add the target square to the closed list, in which case the path has been found (see note below)
+				if (currentPathCalcNode.NodeCached.GridPosition == targetNodePosition)
+				{
+					
+				}
+			}
+			var listOfNodesToAdd = new List<CachedNode>(8);
+			//For each of the 8 squares adjacent to this current square …
+			foreach (var adjacentNode in currentPathCalcNode.NodeCached.AdjacentNodes)
+			{
+				if (adjacentNode.IsWalkable)
+				{
+//If it is not walkable or if it is on the closed list, ignore it. Otherwise do the following
+					if (closedList.All(cachedNode => adjacentNode.GridPosition != cachedNode.NodeCached.GridPosition))
+					{
+						//If it is on the open list already, check to see if this path to that square is better, using G cost as the measure. A lower G cost means 
+						//that this is a better path. If so, change the parent of the square to the current square, and recalculate the G and F scores of the square
+						if (openList.Any(cachedNode => adjacentNode.GridPosition == cachedNode.NodeCached.GridPosition))
+						{
+							var tempAdjNode = openList.Find(openNode => openNode.NodeCached.GridPosition == adjacentNode.GridPosition);
+
+							if (tempAdjNode.GCost < currentPathCalcNode.GCost)
+							{
+								//Debug.Log("Recalculated " + tempAdjNode.NodeCached.gameObject.name + " GCost and FCost and parented it to " +
+								//currentPathCalcNode.NodeCached.gameObject.name);
+								tempAdjNode.ParentNode = currentPathCalcNode.NodeCached;
+								tempAdjNode.GCost = currentPathCalcNode.GCost +
+								                    GetGCost(tempAdjNode.NodeCached.transform.position,
+									                    currentPathCalcNode.NodeCached.transform.position);
+								tempAdjNode.RecalculateFCost();
+							}
+						}
+							//If it isn’t on the open list, add it to the open list. Make the current square the parent of this square. 
+							//Record the F, G, and H costs of the square. 
+						else if (openList.All(cachedNode => adjacentNode.GridPosition != cachedNode.NodeCached.GridPosition))
+						{
+
+							var tempAdjNode =
+								new CachedNode(
+									0, GetHCost(adjacentNode.GridPosition, targetNodePosition), adjacentNode, currentPathCalcNode.NodeCached);
+							listOfNodesToAdd.Add(tempAdjNode);
+						}
+					}
+				}
+				openList.AddRange(listOfNodesToAdd);
+				listOfNodesToAdd.Clear();
+			}
+			yield return null;
+			
 		}
 		if (openList.Count == 0)
 		{
@@ -283,6 +305,10 @@ public class Mover : MonoBehaviour
 		{
 			canReachTarget = true;
 		}
+		movementState = CurrentState.FindingPath;
+		//SmoothPath();
+		PathFindNode = closedList[closedList.Count - 1];
+		isFindTargetRunning = false;
 	}
 
 	/// <summary>
@@ -451,7 +477,7 @@ public class Mover : MonoBehaviour
 		return tempCost;
 	}
 	/// <summary>
-	/// Returns a travel based on the distance between the two nodes
+	/// Returns a travel cost based on the distance between the two nodes
 	/// </summary>
 	/// <param name="currentPos">The current node's position you're calculating at</param>
 	/// <param name="targetPos">The node's position you're calculating travel cost from</param>
