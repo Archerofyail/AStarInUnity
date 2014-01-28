@@ -22,6 +22,10 @@ public class NodeDisplay : MonoBehaviour
 
 	void Start()
 	{
+		print("texWidthHeight was " + texWidthHeight);
+		print("Screen.height is " + Screen.height);
+		texWidthHeight *= (Screen.height / 650f);
+		print("texWidthHeight now " + texWidthHeight);
 		mover = GetComponent<Mover>();
 		mainCam = Camera.main;
 		openList = mover.openList;
