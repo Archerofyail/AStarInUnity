@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1024"
+   height="1024"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="OpenListIcon.svg"
+   inkscape:export-filename="C:\Users\Archerofyail\Github Repos\AStarInUnity\AStarInUnity\Assets\Images\OpenListIcon.png"
+   inkscape:export-xdpi="89.978928"
+   inkscape:export-ydpi="89.978928">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.32"
+     inkscape:cx="304.12191"
+     inkscape:cy="785.76789"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1858"
+     inkscape:window-height="1057"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-28.362183)">
+    <path
+       sodipodi:type="arc"
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:35;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path2985"
+       sodipodi:cx="508.57144"
+       sodipodi:cy="529.71429"
+       sodipodi:rx="488.57144"
+       sodipodi:ry="471.42856"
+       d="M 995.93671,562.82002 C 976.98806,822.54005 743.42628,1018.2628 474.26187,999.979 205.09746,981.69522 2.2575186,756.3286 21.206171,496.60857 40.154823,236.88854 273.71661,41.165799 542.88101,59.449585 811.38921,77.688797 1014.0284,302.04967 996.05215,561.19787"
+       transform="matrix(1.0106613,0,0,1.0474111,3.1493965,-13.895012)"
+       sodipodi:start="0.070282111"
+       sodipodi:end="6.3500184"
+       sodipodi:open="true" />
+    <text
+       xml:space="preserve"
+       style="font-size:500px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="191.20508"
+       y="706.02289"
+       id="text2987"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2989"
+         x="191.20508"
+         y="706.02289">OL</tspan></text>
+  </g>
+</svg>

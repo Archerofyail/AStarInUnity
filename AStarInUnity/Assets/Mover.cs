@@ -45,15 +45,15 @@ public class Mover : MonoBehaviour
 	/// <summary>
 	/// List of nodes that have had their values calculated and are available to be chosen
 	/// </summary>
-	private List<CachedNode> openList;
+	public List<CachedNode> openList;
 	/// <summary>
 	/// List of nodes that have been evaluated based on their cost to move
 	/// </summary>
-	private List<CachedNode> closedList;
+	public List<CachedNode> closedList;
 	/// <summary>
 	/// List of nodes that have been selected to be followed to the target
 	/// </summary>
-	private List<CachedNode> pathNodes;
+	public List<CachedNode> pathNodes;
 	/// <summary>
 	/// The number of steps to check for obstacles in between nodes when smoothing the path
 	/// </summary>
@@ -188,6 +188,11 @@ public class Mover : MonoBehaviour
 			}
 			break;
 		}
+	}
+
+	void OnGUI()
+	{
+		
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -354,7 +359,7 @@ public class Mover : MonoBehaviour
 			var position = new Vector3(firstNode.x + (secondNode.x - firstNode.x) / (stepsBetweenNodes * numOfNodesInBetween) * i, 1,
 									   firstNode.z + (secondNode.z - firstNode.z) / (stepsBetweenNodes * numOfNodesInBetween) * i);
 
-			var tempObjects = Physics.OverlapSphere(position, 0.7f);
+			var tempObjects = Physics.OverlapSphere(position, 0.4f);
 			//If you are intersecting an obstacle, return false
 			if (tempObjects.Any(o => o.tag == "Obstacle" || o.gameObject.layer == 1 << 8))
 			{
@@ -399,7 +404,7 @@ public class Mover : MonoBehaviour
 															  nextNode.gameObject.transform.position - transform.position,
 															  rotationSpeed * Time.deltaTime, rotationSpeed * Time.deltaTime));
 			transform.rotation = new Quaternion(0, temp.y, 0, temp.w);
-			rigidbody.MovePosition(new Vector3(0, 0, speed * Time.deltaTime));
+			transform.Translate(0, 0, speed * Time.deltaTime);
 			//Debug.DrawRay(nextNode.gameObject.transform.position, nextNode.transform.up, Color.red, 1f);
 		}
 
