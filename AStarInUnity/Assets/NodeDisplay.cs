@@ -18,6 +18,8 @@ public class NodeDisplay : MonoBehaviour
 
 	public Camera mainCam;
 
+	public bool displayNodes = true;
+
 	private Mover mover;
 
 	void Start()
@@ -52,46 +54,50 @@ public class NodeDisplay : MonoBehaviour
 
 	private void OnGUI()
 	{
-		if (openList != null)
+		if (displayNodes)
 		{
-			foreach (var node in openList)
+			if (openList != null)
 			{
-				if (!closedList.Contains(node) && !pathList.Contains(node))
+				foreach (var node in openList)
 				{
-					var screenPos = mainCam.WorldToScreenPoint(node.NodeCached.transform.position);
-					GUI.DrawTexture(
-						new Rect(screenPos.x - texWidthHeight / 2, Screen.height - (screenPos.y + texWidthHeight / 2), texWidthHeight,
-							texWidthHeight), OpenListTex);
+					if (!closedList.Contains(node) && !pathList.Contains(node))
+					{
+						var screenPos = mainCam.WorldToScreenPoint(node.NodeCached.transform.position);
+						GUI.DrawTexture(
+							new Rect(screenPos.x - texWidthHeight / 2, Screen.height - (screenPos.y + texWidthHeight / 2), texWidthHeight,
+								texWidthHeight), OpenListTex);
+					}
 				}
 			}
-		}
-		if (closedList != null)
-		{
+			if (closedList != null)
+			{
 
-			foreach (var node in closedList)
+				foreach (var node in closedList)
+				{
+					if (!pathList.Contains(node))
+					{
+						var screenPos = mainCam.WorldToScreenPoint(node.NodeCached.transform.position);
+						GUI.DrawTexture(
+							new Rect(screenPos.x - texWidthHeight / 2, Screen.height - (screenPos.y + texWidthHeight / 2), texWidthHeight,
+								texWidthHeight), ClosedListTex);
+					}
+				}
+			}
+			if (pathList != null)
 			{
-				if (!pathList.Contains(node))
+				foreach (var node in pathList)
 				{
 					var screenPos = mainCam.WorldToScreenPoint(node.NodeCached.transform.position);
 					GUI.DrawTexture(
 						new Rect(screenPos.x - texWidthHeight / 2, Screen.height - (screenPos.y + texWidthHeight / 2), texWidthHeight,
-							texWidthHeight), ClosedListTex);
+							texWidthHeight), PathListTex);
 				}
 			}
+			var moverScreenPos = mainCam.WorldToScreenPoint(transform.position);
+			GUI.DrawTexture(
+				new Rect(moverScreenPos.x - texWidthHeight / 2, Screen.height - (moverScreenPos.y + texWidthHeight / 2),
+					texWidthHeight,
+					texWidthHeight), currentPosTex);
 		}
-		if (pathList != null)
-		{
-			foreach (var node in pathList)
-			{
-				var screenPos = mainCam.WorldToScreenPoint(node.NodeCached.transform.position);
-				GUI.DrawTexture(
-					new Rect(screenPos.x - texWidthHeight / 2, Screen.height - (screenPos.y + texWidthHeight / 2), texWidthHeight,
-						texWidthHeight), PathListTex);
-			}
-		}
-		var moverScreenPos = mainCam.WorldToScreenPoint(transform.position);
-		GUI.DrawTexture(
-			new Rect(moverScreenPos.x - texWidthHeight / 2, Screen.height - (moverScreenPos.y + texWidthHeight / 2), texWidthHeight,
-				texWidthHeight), currentPosTex);
 	}
 }

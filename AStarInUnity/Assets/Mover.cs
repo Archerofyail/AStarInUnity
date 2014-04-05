@@ -99,7 +99,7 @@ public class Mover : MonoBehaviour
 
 	void Start()
 	{
-		
+
 		aStarGrid = GameObject.Find("AStarNodeManager").GetComponent<AStarGridCreator>();
 		if (targetNodePosition.x < 0)
 		{
@@ -109,14 +109,15 @@ public class Mover : MonoBehaviour
 		{
 			initialPosition = GetRandomWaypoint().GridPosition;
 		}
+		//Initialize lists
 		openList = new List<CachedNode>(50);
 		closedList = new List<CachedNode>(50);
 		pathNodes = new List<CachedNode>(50);
-		transform.position = aStarGrid.AStarNodes[(int)initialPosition.y, (int)initialPosition.x].transform.position;
 		currentMoverGridPosition = initialPosition;
 		currentPathCalcNode = new CachedNode(0, GetHCost(currentMoverGridPosition, targetNodePosition),
 														 aStarGrid.AStarNodes[(int)initialPosition.y, (int)initialPosition.x].GetComponent<AStarNode>(),
 														aStarGrid.AStarNodes[(int)initialPosition.y, (int)initialPosition.x].GetComponent<AStarNode>());
+		//Set position to initial node set in inspector
 		transform.position = currentPathCalcNode.NodeCached.transform.position;
 		nextNode = aStarGrid.AStarNodes[(int)currentMoverGridPosition.y, (int)currentMoverGridPosition.x].GetComponent<AStarNode>();
 	}
@@ -143,10 +144,8 @@ public class Mover : MonoBehaviour
 				closedList.Clear();
 				openList.Clear();
 				pathNodes.Clear();
-				
-				
+				//Start looking for path
 				movementState = CurrentState.LookingForTarget;
-
 				openList.Add(currentPathCalcNode);
 				canReachTarget = true;
 				currentNode = 0;
@@ -209,7 +208,7 @@ public class Mover : MonoBehaviour
 
 	void OnGUI()
 	{
-		
+
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -250,7 +249,7 @@ public class Mover : MonoBehaviour
 				//Stop when you add the target square to the closed list, in which case the path has been found (see note below)
 				if (currentPathCalcNode.NodeCached.GridPosition == targetNodePosition)
 				{
-					
+
 				}
 			}
 			var listOfNodesToAdd = new List<CachedNode>(8);
@@ -259,7 +258,7 @@ public class Mover : MonoBehaviour
 			{
 				if (adjacentNode.IsWalkable)
 				{
-//If it is not walkable or if it is on the closed list, ignore it. Otherwise do the following
+					//If it is not walkable or if it is on the closed list, ignore it. Otherwise do the following
 					if (closedList.All(cachedNode => adjacentNode.GridPosition != cachedNode.NodeCached.GridPosition))
 					{
 						//If it is on the open list already, check to see if this path to that square is better, using G cost as the measure. A lower G cost means 
@@ -274,13 +273,13 @@ public class Mover : MonoBehaviour
 								//currentPathCalcNode.NodeCached.gameObject.name);
 								tempAdjNode.ParentNode = currentPathCalcNode.NodeCached;
 								tempAdjNode.GCost = currentPathCalcNode.GCost +
-								                    GetGCost(tempAdjNode.NodeCached.transform.position,
-									                    currentPathCalcNode.NodeCached.transform.position);
+													GetGCost(tempAdjNode.NodeCached.transform.position,
+														currentPathCalcNode.NodeCached.transform.position);
 								tempAdjNode.RecalculateFCost();
 							}
 						}
-							//If it isn’t on the open list, add it to the open list. Make the current square the parent of this square. 
-							//Record the F, G, and H costs of the square. 
+						//If it isn’t on the open list, add it to the open list. Make the current square the parent of this square. 
+						//Record the F, G, and H costs of the square. 
 						else if (openList.All(cachedNode => adjacentNode.GridPosition != cachedNode.NodeCached.GridPosition))
 						{
 
@@ -295,7 +294,7 @@ public class Mover : MonoBehaviour
 				listOfNodesToAdd.Clear();
 			}
 			yield return null;
-			
+
 		}
 		if (openList.Count == 0)
 		{
