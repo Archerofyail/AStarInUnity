@@ -19,6 +19,7 @@ public class NodeDisplay : MonoBehaviour
 	public Camera mainCam;
 
 	public bool displayNodes = true;
+	public bool displayCurrentPos = true;
 
 	private Mover mover;
 
@@ -93,9 +94,13 @@ public class NodeDisplay : MonoBehaviour
 							texWidthHeight), PathListTex);
 				}
 			}
+			
+		}
+		if (displayCurrentPos)
+		{
 			var moverScreenPos = mainCam.WorldToScreenPoint(transform.position);
 			GUI.DrawTexture(
-				new Rect(moverScreenPos.x - texWidthHeight / 2, Screen.height - (moverScreenPos.y + texWidthHeight / 2),
+				new Rect(moverScreenPos.x - texWidthHeight/2, Screen.height - (moverScreenPos.y + texWidthHeight/2),
 					texWidthHeight,
 					texWidthHeight), currentPosTex);
 		}

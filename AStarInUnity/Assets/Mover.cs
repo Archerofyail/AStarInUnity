@@ -172,7 +172,7 @@ public class Mover : MonoBehaviour
 			break;
 			case CurrentState.FindingPath:
 			{
-				StartCoroutine("FindPathCoroutine");
+				FindPathCoroutine();
 			}
 			break;
 			case CurrentState.Moving:
@@ -321,20 +321,23 @@ public class Mover : MonoBehaviour
 	}
 
 
-	IEnumerator FindPathCoroutine()
+	void FindPathCoroutine()
 	{
 		int iterationCount = 0;
 		while (iterationCount < iterationsPerFrame)
 		{
-			FindPath();
-			yield return null;
+			if(FindPath())
+			{
+				break;
+			}
 		}
+
 	}
 
 	/// <summary>
 	/// Works back from the target position, using each CachedNode's parent node to find the currentMoverPosition and makes a suitable path
 	/// </summary>
-	void FindPath()
+	bool FindPath()
 	{
 		if (PathFindNode.NodeCached)
 		{
@@ -343,6 +346,7 @@ public class Mover : MonoBehaviour
 				pathNodes.Add(PathFindNode);
 				PathFindNode =
 					closedList.Find(closedNode => closedNode.NodeCached.GridPosition == PathFindNode.ParentNode.GridPosition);
+				return false;
 			}
 			else
 			{
@@ -350,8 +354,10 @@ public class Mover : MonoBehaviour
 				SmoothPath();
 				movementState = CurrentState.Moving;
 				StopCoroutine("FindPathCoroutine");
+				return true;
 			}
 		}
+		return false;
 	}
 
 	/// <summary>
