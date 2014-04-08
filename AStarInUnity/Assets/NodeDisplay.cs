@@ -20,6 +20,7 @@ public class NodeDisplay : MonoBehaviour
 
 	public bool displayNodes = true;
 	public bool displayCurrentPos = true;
+	private float fps = 0;
 
 	private Mover mover;
 
@@ -39,6 +40,7 @@ public class NodeDisplay : MonoBehaviour
 
 	private void Update()
 	{
+		fps = 1 / Time.deltaTime;
 		if (openList == null)
 		{
 			openList = mover.openList;
@@ -55,6 +57,12 @@ public class NodeDisplay : MonoBehaviour
 
 	private void OnGUI()
 	{
+		GUILayout.BeginArea(new Rect(Screen.width * 0.8f, Screen.height * 0.01f, Screen.width * 0.2f, Screen.height * 0.15f));
+		displayNodes = GUILayout.Toggle(displayNodes, "Display Nodes");
+		GUILayout.Label("Pathfinding iterations per frame:");
+		mover.iterationsPerFrame = int.Parse(GUILayout.TextField(mover.iterationsPerFrame.ToString()));
+		GUILayout.Label("FPS: " + fps);
+		GUILayout.EndArea();
 		if (displayNodes)
 		{
 			if (openList != null)
