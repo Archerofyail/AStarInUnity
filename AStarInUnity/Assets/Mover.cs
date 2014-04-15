@@ -221,7 +221,7 @@ public class Mover : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Searches for the target using an A* search algorithm (WIP)
+	/// Searches for the target using an A* search algorithm
 	/// </summary>
 	private IEnumerator FindTarget()
 	{
@@ -250,11 +250,7 @@ public class Mover : MonoBehaviour
 				closedList.Add(currentPathCalcNode);
 				// Switch it to the closed list.
 				openList.Remove(currentPathCalcNode);
-				//Stop when you add the target square to the closed list, in which case the path has been found (see note below)
-				//if (currentPathCalcNode.NodeCached.GridPosition == targetNodePosition)
-				//{
-				//	break;
-				//}
+				
 			}
 			var listOfNodesToAdd = new List<CachedNode>(8);
 			//For each of the 8 squares adjacent to this current square …
