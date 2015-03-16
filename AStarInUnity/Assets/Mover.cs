@@ -225,14 +225,20 @@ public class Mover : MonoBehaviour
 	/// </summary>
 	private IEnumerator FindTarget()
 	{
+		//TODO:Find a way to get point in between start and goal so you don't have to do all the work at once.
 		int iterationCount = 0;
-
+		var listOfNodesToAdd = new List<CachedNode>(8);
+		var tempOpenNode = new CachedNode(10000, 15000, null, null);
 
 		while ((currentPathCalcNode.NodeCached.GridPosition != targetNodePosition && openList.Count > 0))
 		{
 			isFindTargetRunning = true;
 			//Find the cheapest FCost node in the open list
-			var tempOpenNode = new CachedNode(10000, 15000, null, null);
+			tempOpenNode.GCost = 10000;
+			tempOpenNode.HCost = 15000;
+			tempOpenNode.ParentNode = null;
+			tempOpenNode.NodeCached = null;
+			tempOpenNode.RecalculateFCost();
 			// Look for the lowest F cost square on the open list. We refer to this as the current square.
 			foreach (var node in openList)
 			{
@@ -242,18 +248,16 @@ public class Mover : MonoBehaviour
 					tempOpenNode = node;
 				}
 			}
+			listOfNodesToAdd.Clear();
+
+			currentPathCalcNode = tempOpenNode;
+
+			closedList.Add(currentPathCalcNode);
+			// Switch it to the closed list.
+			openList.Remove(currentPathCalcNode);
 
 
-			{
-				currentPathCalcNode = tempOpenNode;
-
-				closedList.Add(currentPathCalcNode);
-				// Switch it to the closed list.
-				openList.Remove(currentPathCalcNode);
-				
-			}
-			var listOfNodesToAdd = new List<CachedNode>(8);
-			//For each of the 8 squares adjacent to this current square …
+			//For each of the 8 squares adjacent to this current square ...
 			foreach (var adjacentNode in currentPathCalcNode.NodeCached.AdjacentNodes)
 			{
 				if (adjacentNode.IsWalkable)
@@ -294,7 +298,7 @@ public class Mover : MonoBehaviour
 				listOfNodesToAdd.Clear();
 			}
 
-			
+
 			iterationCount++;
 			if (iterationCount > iterationsPerFrame)
 			{
@@ -322,7 +326,8 @@ public class Mover : MonoBehaviour
 		int iterationCount = 0;
 		while (iterationCount < iterationsPerFrame)
 		{
-			if(FindPath())
+			iterationCount++;
+			if (FindPath())
 			{
 				break;
 			}
@@ -349,7 +354,6 @@ public class Mover : MonoBehaviour
 				pathNodes.Reverse();
 				SmoothPath();
 				movementState = CurrentState.Moving;
-				StopCoroutine("FindPathCoroutine");
 				return true;
 			}
 		}
