@@ -161,7 +161,7 @@ public class NodeDisplay : MonoBehaviour
 
 	private void OnGUI()
 	{
-		GUILayout.BeginArea(new Rect(Screen.width * 0.8f, Screen.height * 0.01f, Screen.width * 0.2f, Screen.height * 0.15f));
+		GUILayout.BeginArea(new Rect(Screen.width * 0.8f, Screen.height * 0.01f, Screen.width * 0.2f, Screen.height * 0.8f));
 		displayNodes = GUILayout.Toggle(displayNodes, "Display Nodes");
 		GUILayout.Label("Pathfinding iterations per frame:");
 		mover.iterationsPerFrame = int.Parse(GUILayout.TextField(mover.iterationsPerFrame.ToString()));
