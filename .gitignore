@@ -10,3 +10,5 @@
 *.user
 *.suo
 *.db
+AStarInUnity/Builds/
+AStarInUnity/.vs/
